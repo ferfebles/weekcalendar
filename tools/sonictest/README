@@ -1,0 +1,54 @@
+Sounds effects for autotest
+http://fozworks.com/2007/7/28/autotest-sound-effects
+
+This plugin triggers sound files for autotest events. 
+
+It requires that you have a command-line mp3 player installed. 
+On OSX and Linux, I suggest mpg321, which is available from most package managers (including macports). For fink users, try madplay.
+
+On Windows, try the mplayer command-line app, which can be downloaded from:
+
+ http://www.mplayerhq.hu/design7/dload.html 
+
+In you ~/.autotest file, load the plugin and set the sounds location:
+
+ require '~/autotest/sound/sound.rb'
+ Autotest::Sound.sound_path = "~/autotest/sound/sound_fx/"
+
+If you are on Windows, you will need some additional stuff:
+
+ Autotest::Sound.sound_app = "call c:/mplayer/mplayer.exe -really-quiet"
+ Autotest::Sound.process_devnull = "> c:/Windows/Temp/_mplayer_tmp.txt" 
+ Autotest::Sound.process_bg = ""
+
+(thanks to John for the Windows info and jinjing for suggesting madplay)
+
+All sounds in sound_fx were created by me, free for your use. See the README and LICENSE in the sound_fx dir.
+
+- foz
+
+Sound Effects for Autotest
+----------------------------------------
+jeremy@somebox.com 
+http://fozworks.com/2007/7/28/autotest-sound-effects
+
+Hello Friends,
+
+I created this is a collection of sound effects for autotest. 
+
+The sounds were designed to be audibly interesting, but not too grating. Several of the sounds are subtle in nature, so they do not alarm you or bother your work neighbors (although this is subject to debate - you can always use your own sounds, if you want!).
+
+About The Sounds
+----------------
+These sounds were all created several years ago on the Clavia Nord Modular, still my favlorite toy. See http://www.clavia.se for more information in this excellent instrument. Everything was recorded in 44khz 24-bit (and downsampled to 44khz 16-bit wav files) using an RME Hammerfall DSP converter. The effects were edited and processed.
+
+License:
+--------
+Sounds are released under Creative Commons "Sampling Plus 1.0" License:
+
+  http://creativecommons.org/licenses/sampling+/1.0/
+
+See LICENSE for full details.
+
+
+-foz
