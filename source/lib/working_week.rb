@@ -1,5 +1,6 @@
+require 'date'
 
-# A WorkingWeek start always on monday
+# A WorkingWeek starts always on monday
 # the first wweek of the year is the wweek 0
 # wweek 0 is the week that includes January 1st
 # wweek 0 can include days from the previous year
@@ -8,7 +9,8 @@
 class WorkingWeek
   def initialize(year, week_number)
     @year = year
-    @monday = first_monday_of_weekyear(year) + week_number * 7
+    @monday = first_monday_of_working_year(year) + week_number * 7
+    fail ArgumentError, 'too many weeks' unless @monday.year <= @year
   end
 
   def days
@@ -41,7 +43,7 @@ class WorkingWeek
 
   private
 
-  def first_monday_of_weekyear(year)
+  def first_monday_of_working_year(year)
     monday_of_week_for_date Date.new(year, 1, 1)
   end
 

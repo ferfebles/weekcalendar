@@ -1,55 +1,22 @@
-require 'date'
-require 'pry'
-require 'pp'
+STARTED_AT = Time.now
+require_relative 'working_week'
 
 year = Time.now.year
-first = Date.new(year, 1, 1)
-day = first - (first.cwday - 1)
-month = 1
-week = 0
-# calendar = Array.new() { Array.new() { Array.new() } }
-calendar = Hash.new(nil)
-while true
-  while true
-    calendar[[month, week, day.cwday]] = day
-    day += 1
+100.times { |i|
+  wweek = WorkingWeek.new(year, i) rescue break
+  print Date::MONTHNAMES[wweek.month]
+  #print month: wweek.month, week: i
+  #puts days: wweek.days
+  wweek.month_calendar.each { |day|
     if day.monday?
-      break if (month < day.month) || (year < day.year)
-      week += 1
+      if wweek.days.first == day
+        print "\n> "
+      else
+        print "\n  "
+      end
     end
-  end
-  break if month == 12
-  day = calendar[[month, week, 1]] unless day.monday? && day.mday == 1
-  month += 1
-  week = 0
-end
-
-calendar.each_key do |m, w, d|
-  if d == 1
-    puts "\n"
-    puts "\n#{m}\n" if w == 0
-  end
-  print '%2d  ' % calendar[[m, w, d]].mday
-end
-puts "\n\n"
-
-=begin
-      calendar =[[d1, d2, d3, d4, d5, d6, d7],
-                 [d1, d2, d3, d4, d5, d6, d7],
-                 [d1, d2, d3, d4, d5, d6, d7],
-                 [d1, d2, d3, d4, d5, d6, d7],
-                 [d1, d2, d3, d4, d5, d6, d7],
-                ]
-
-      w = 0
-      m = 0
-      loop {
-        DibujarMes(m, w, calendar)
-        w += 1
-        if calendar(m,w).nil?
-          w = calendar(m,w,0).monday? ? 0 : 1
-          m += 1
-          exit if m == 12
-        end
-      }
-=end
+    print "%2d  " % day.mday
+  }
+  puts "\n\n"
+}
+puts "Done in #{Time.now - STARTED_AT}s"

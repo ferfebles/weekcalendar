@@ -1,8 +1,6 @@
 require_relative 'test_helper'
 require_relative '../lib/working_week'
 
-require 'pry'
-
 # WorkingWeek starts on monday
 class TestWorkingWeek < Minitest::Test
   def setup
@@ -14,6 +12,11 @@ class TestWorkingWeek < Minitest::Test
     @ww2012_53 = WorkingWeek.new(2012, 53)
     @working_weeks = [@ww2014_01, @ww2011_27, @ww2012_01, @ww2012_06,
                       @ww2012_09, @ww2012_53]
+  end
+
+  def test_initialize
+    assert_raises(ArgumentError) { WorkingWeek.new(2010, 60) }
+    assert WorkingWeek.new(2014, 0)
   end
 
   def test_days
