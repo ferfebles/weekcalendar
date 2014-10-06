@@ -7,11 +7,11 @@ first = Date.new(year, 1, 1)
 day = first - (first.cwday - 1)
 month = 1
 week = 0
-#calendar = Array.new() { Array.new() { Array.new() } }
+# calendar = Array.new() { Array.new() { Array.new() } }
 calendar = Hash.new(nil)
 while true
   while true
-    calendar[[month, week, (day.wday - 1) % 7]] = day
+    calendar[[month, week, day.cwday]] = day
     day += 1
     if day.monday?
       break if (month < day.month) || (year < day.year)
@@ -19,13 +19,13 @@ while true
     end
   end
   break if month == 12
-  day = calendar[[month, week, 0]] unless day.monday? && day.mday == 1
+  day = calendar[[month, week, 1]] unless day.monday? && day.mday == 1
   month += 1
   week = 0
 end
 
 calendar.each_key do |m, w, d|
-  if d == 0
+  if d == 1
     puts "\n"
     puts "\n#{m}\n" if w == 0
   end

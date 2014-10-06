@@ -1,0 +1,12 @@
+
+RescueModifier:
+  Enabled: false
+
+LineEndConcatenation:
+  Enabled: false
+
+WordArray:
+  Enabled: false
+
+Style/ClassVars:
+  Enabled: false

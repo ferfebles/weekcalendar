@@ -1,0 +1,6 @@
+require 'autotest/restart'
+# require_relative '../tools/sonictest/sonictest.rb'
+
+Autotest.add_hook :initialize do |at|
+  at.testlib = 'minitest/autorun'
+end
