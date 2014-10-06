@@ -29,12 +29,27 @@ class WorkingWeek
     (@monday + 2).month
   end
 
+  def month_calendar
+    first_day_of_month = Date.new(@year, month, 1)
+    last_day_of_month = Date.new(@year, month, -1)
+    first = monday_of_week_for_date(first_day_of_month)
+    last = sunday_of_week_for_date(last_day_of_month)
+    (first..last)
+  end
+
   #--------------------------------------------------
 
   private
 
   def first_monday_of_weekyear(year)
-    first_day_of_year = Date.new(year, 1, 1)
-    first_day_of_year - (first_day_of_year.cwday - 1)
+    monday_of_week_for_date Date.new(year, 1, 1)
+  end
+
+  def sunday_of_week_for_date(date)
+    monday_of_week_for_date(date) + 6
+  end
+
+  def monday_of_week_for_date(date)
+    date - (date.cwday - 1)
   end
 end

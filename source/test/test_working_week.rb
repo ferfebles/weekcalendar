@@ -1,6 +1,8 @@
 require_relative 'test_helper'
 require_relative '../lib/working_week'
 
+require 'pry'
+
 # WorkingWeek starts on monday
 class TestWorkingWeek < Minitest::Test
   def setup
@@ -31,14 +33,13 @@ class TestWorkingWeek < Minitest::Test
     assert_equal 12, @ww2012_53.month
   end
 
-  def test_wmonth
-    skip
+  def test_month_calendar
     @working_weeks.each do |wweek|
-      first_monday = wweek.wmonth.first
+      first_monday = wweek.month_calendar.first
       first_sunday = first_monday + 6
       assert first_monday.monday?
       assert((first_monday..first_sunday).find { |day| day.mday == 1 })
-      last_sunday = wweek.wmonth.last
+      last_sunday = wweek.month_calendar.last
       last_monday = last_sunday - 6
       assert last_sunday.sunday?
       assert_equal((first_sunday).month, (last_monday).month)
