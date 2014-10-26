@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+gem 'prawn'
+
 gem 'minitest'
 gem 'rubocop'
 gem 'autotest'

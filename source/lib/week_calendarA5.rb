@@ -94,8 +94,10 @@ Prawn::Document.generate('calendar.pdf',
                     align: :center, valign: :center
     stamp_at 'dots', [gutter_cm + hmargin_cm - dot_size_cm, vmargin_cm]
   end
+  year_calendar = ''
   100.times do |i|
     wweek = WorkingWeek.new(year, i) rescue break
+    year_calendar << wweek.days.map { |d| format('%2d', d.mday) }.join('  ') + "\n"
     start_new_page
     start_new_page
     calendar = WeekCalendar.new(wweek).pdf_text
@@ -107,5 +109,12 @@ Prawn::Document.generate('calendar.pdf',
                        leading: 1.15.mm
 
   end
+  start_new_page
+  text_box year_calendar, at: [hmargin_cm + 11.75.cm, page_height - vmargin_cm],
+                     width: 6.cm, height: page_height - vmargin_cm * 2,
+                     inline_format: true,
+                     align: :right, valign: :bottom,
+                     overflow: :shrink_to_fit, min_font_size: 2
+
 end
 puts "Done in #{Time.now - STARTED_AT}s"
