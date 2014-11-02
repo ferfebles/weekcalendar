@@ -13,6 +13,8 @@ class WorkingWeek
     fail ArgumentError, 'too many weeks' unless @monday.year <= @year
   end
 
+  attr_reader :year
+
   def days
     (@monday..(@monday + 6))
   end

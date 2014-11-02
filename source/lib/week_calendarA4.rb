@@ -10,11 +10,26 @@ class WeekCalendar
     @wweek = wweek
   end
 
-  def pdf_text
+  def format_for_month_calendar
     Date::MONTHNAMES[@wweek.month] +
     @wweek.month_calendar.map do |day|
       current_week?(day) ? d_style(tag(day)) : tag(day)
     end.join
+  end
+
+  def format_for_year_calendar
+    week = @wweek.days.map { |d| format('%2d', d.mday) }.join('  ')
+    sunday = @wweek.days.last
+    case
+    when (1..7).include?(sunday.mday) && sunday.year == @wweek.year
+      d_style("#{week}  #{Date::MONTHNAMES[@wweek.days.last.month][0]}\n")
+    when (8..14).include?(sunday.mday)
+      "#{week}  #{Date::MONTHNAMES[@wweek.days.last.month][1]}\n"
+    when (15..21).include?(sunday.mday)
+      "#{week}  #{Date::MONTHNAMES[@wweek.days.last.month][2]}\n"
+    else
+      "#{week}   \n"
+    end
   end
 
   def current_week?(day)
@@ -147,21 +162,6 @@ class PdfCalendar
   end
 end
 
-def map_week_days(wweek)
-  week = wweek.days.map { |d| format('%2d', d.mday) }.join('  ')
-  case wweek.days.last.mday
-  when 1..7
-    "<color rgb='000000'>" +
-    "#{week}  #{Date::MONTHNAMES[wweek.days.last.month][0]}</color>\n"
-  when 8..14
-    "#{week}  #{Date::MONTHNAMES[wweek.days.last.month][1]}\n"
-  when 15..21
-    "#{week}  #{Date::MONTHNAMES[wweek.days.last.month][2]}\n"
-  else
-    "#{week}   \n"
-  end
-end
-
 page_width, page_height = PDF::Core::PageGeometry::SIZES['A4']
 dot_size_cm = 0.015.cm
 gutter_cm = 1.cm
@@ -178,9 +178,9 @@ p.mid_page_mark
 p.stamp_at 'dots', [gutter_cm + hmargin_cm - dot_size_cm, vmargin_cm]
 p.thu_sun
 wweek = WorkingWeek.new(year, 0)
-year_calendar << map_week_days(wweek)
-calendar = WeekCalendar.new(wweek).pdf_text
-p.calendar_column_bottom(calendar)
+wcalendar = WeekCalendar.new(wweek)
+p.calendar_column_bottom(wcalendar.format_for_month_calendar)
+year_calendar << wcalendar.format_for_year_calendar
 
 i = 1
 while true
@@ -192,14 +192,14 @@ while true
   p.start_new_page
   p.background_odd
 
-  year_calendar << map_week_days(wweek)
-  calendar = WeekCalendar.new(wweek).pdf_text
-  p.calendar_column_top calendar
+  wcalendar = WeekCalendar.new(wweek)
+  p.calendar_column_top wcalendar.format_for_month_calendar
+  year_calendar << wcalendar.format_for_year_calendar
   i += 1
   wweek = WorkingWeek.new(year, i) rescue break
-  year_calendar << map_week_days(wweek)
-  calendar = WeekCalendar.new(wweek).pdf_text
-  p.calendar_column_bottom(calendar)
+  wcalendar = WeekCalendar.new(wweek)
+  p.calendar_column_bottom wcalendar.format_for_month_calendar
+  year_calendar << wcalendar.format_for_year_calendar
   i += 1
 end
 
