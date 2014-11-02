@@ -52,16 +52,43 @@ class PdfCalendar
                                      width: 6.cm, height: 1.cm, align: :right
   end
 
-  def mon_wed_top
-    mon_wed_bottom(@page_height / 2)
+  def background_odd
+    [@page_height / 2, 0].each do |y|
+      @pdf.stamp_at 'dots', [@gutter_cm + @hmargin_cm - @dot_size_cm,
+                             y + @vmargin_cm]
+      thu_sun(y)
+    end
+    mid_page_mark
   end
 
-  def mon_wed_bottom(y = 0)
+  def background_even
+    [@page_height / 2, 0].each do |y|
+      @pdf.stamp_at 'dots', [@hmargin_cm - @dot_size_cm,
+                             y + @vmargin_cm]
+      mon_wed(y)
+    end
+    mid_page_mark
+  end
+
+  def mon_wed(y = 0)
     xd = 0
     ['mon', 'tue', 'wed'].each do |day|
       day_box day, @hmargin_cm + (5 + xd).cm, y + @page_height / 2 - @vmargin_cm
       xd += 6
     end
+  end
+
+  def thu_sun(y = 0)
+    xd = - 6
+    ['thu', 'fri', 'sat'].each do |day|
+      xd += 6
+      day_box day,
+              @gutter_cm + @hmargin_cm + (5 + xd).cm,
+              y + @page_height / 2 - @vmargin_cm
+    end
+    day_box 'sun',
+            @gutter_cm + @hmargin_cm + (5 + xd).cm,
+            y + @page_height / 2 - @vmargin_cm - 4.5.cm
   end
 
   def calendar_column_top(text, x = 0, y = 0)
@@ -120,6 +147,21 @@ class PdfCalendar
   end
 end
 
+def map_week_days(wweek)
+  week = wweek.days.map { |d| format('%2d', d.mday) }.join('  ')
+  case wweek.days.last.mday
+  when 1..7
+    "<color rgb='000000'>" +
+    "#{week}  #{Date::MONTHNAMES[wweek.days.last.month][0]}</color>\n"
+  when 8..14
+    "#{week}  #{Date::MONTHNAMES[wweek.days.last.month][1]}\n"
+  when 15..21
+    "#{week}  #{Date::MONTHNAMES[wweek.days.last.month][2]}\n"
+  else
+    "#{week}   \n"
+  end
+end
+
 page_width, page_height = PDF::Core::PageGeometry::SIZES['A4']
 dot_size_cm = 0.015.cm
 gutter_cm = 1.cm
@@ -134,82 +176,43 @@ p = PdfCalendar.new(Time.now.year)
 p.title
 p.mid_page_mark
 p.stamp_at 'dots', [gutter_cm + hmargin_cm - dot_size_cm, vmargin_cm]
-p.text_box 'thu', at: [gutter_cm + hmargin_cm + 5.cm, page_height / 2 - vmargin_cm],
-                  width: 1.cm, height: 0.45.cm,
-                  align: :center, valign: :center
-p.text_box 'fri', at: [gutter_cm + hmargin_cm + 11.cm, page_height / 2 - vmargin_cm],
-                  width: 1.cm, height: 0.45.cm,
-                  align: :center, valign: :center
-p.text_box 'sat', at: [gutter_cm + hmargin_cm + 17.cm, page_height / 2 - vmargin_cm],
-                  width: 1.cm, height: 0.45.cm,
-                  align: :center, valign: :center
-p.text_box 'sun', at: [gutter_cm + hmargin_cm + 17.cm, page_height / 2 - vmargin_cm - 4.5.cm],
-                  width: 1.cm, height: 0.45.cm,
-                  align: :center, valign: :center
+p.thu_sun
 wweek = WorkingWeek.new(year, 0)
-year_calendar << wweek.days.map { |d| format('%2d', d.mday) }.join('  ') + "\n"
+year_calendar << map_week_days(wweek)
 calendar = WeekCalendar.new(wweek).pdf_text
 p.calendar_column_bottom(calendar)
 
-# Odd pages
-p.repeat(->(pg) { pg.odd? && pg > 1 }) do
-  p.text_box 'thu', at: [gutter_cm + hmargin_cm + 5.cm, page_height - vmargin_cm],
-                    width: 1.cm, height: 0.45.cm,
-                    align: :center, valign: :center
-  p.text_box 'fri', at: [gutter_cm + hmargin_cm + 11.cm, page_height - vmargin_cm],
-                    width: 1.cm, height: 0.45.cm,
-                    align: :center, valign: :center
-  p.text_box 'sat', at: [gutter_cm + hmargin_cm + 17.cm, page_height - vmargin_cm],
-                    width: 1.cm, height: 0.45.cm,
-                    align: :center, valign: :center
-  p.text_box 'sun', at: [gutter_cm + hmargin_cm + 17.cm, page_height - vmargin_cm - 4.5.cm],
-                    width: 1.cm, height: 0.45.cm,
-                    align: :center, valign: :center
-
-  p.text_box 'thu', at: [gutter_cm + hmargin_cm + 5.cm, page_height / 2 - vmargin_cm],
-                    width: 1.cm, height: 0.45.cm,
-                    align: :center, valign: :center
-  p.text_box 'fri', at: [gutter_cm + hmargin_cm + 11.cm, page_height / 2 - vmargin_cm],
-                    width: 1.cm, height: 0.45.cm,
-                    align: :center, valign: :center
-  p.text_box 'sat', at: [gutter_cm + hmargin_cm + 17.cm, page_height / 2 - vmargin_cm],
-                    width: 1.cm, height: 0.45.cm,
-                    align: :center, valign: :center
-  p.text_box 'sun', at: [gutter_cm + hmargin_cm + 17.cm, page_height / 2 - vmargin_cm - 4.5.cm],
-                    width: 1.cm, height: 0.45.cm,
-                    align: :center, valign: :center
-end
-
 i = 1
 while true
-  p.start_new_page
-  p.stamp_at 'dots', [hmargin_cm - dot_size_cm, page_height / 2 + vmargin_cm]
-  p.mon_wed_top
-  p.mid_page_mark
-  p.stamp_at 'dots', [hmargin_cm - dot_size_cm, vmargin_cm]
-  p.mon_wed_bottom
+  wweek = WorkingWeek.new(year, i) rescue break
 
   p.start_new_page
-  p.stamp_at 'dots', [gutter_cm + hmargin_cm - dot_size_cm, page_height / 2 + vmargin_cm]
-  p.mid_page_mark
-  p.stamp_at 'dots', [gutter_cm + hmargin_cm - dot_size_cm, vmargin_cm]
-  wweek = WorkingWeek.new(year, i) rescue break
-  year_calendar << wweek.days.map { |d| format('%2d', d.mday) }.join('  ') + "\n"
+  p.background_even
+
+  p.start_new_page
+  p.background_odd
+
+  year_calendar << map_week_days(wweek)
   calendar = WeekCalendar.new(wweek).pdf_text
   p.calendar_column_top calendar
   i += 1
   wweek = WorkingWeek.new(year, i) rescue break
-  year_calendar << wweek.days.map { |d| format('%2d', d.mday) }.join('  ') + "\n"
+  year_calendar << map_week_days(wweek)
   calendar = WeekCalendar.new(wweek).pdf_text
   p.calendar_column_bottom(calendar)
   i += 1
 end
 
 p.start_new_page
-p.text_box year_calendar, at: [hmargin_cm + 11.75.cm, page_height - vmargin_cm],
-                       width: 6.cm, height: page_height / 2 - vmargin_cm * 2,
-                       inline_format: true,
-                       align: :right, valign: :bottom,
-                       overflow: :shrink_to_fit, min_font_size: 2
+p.font 'Inconsolata0.ttf', size: 6
+p.mid_page_mark
+[page_height / 2 , 0].each do |y|
+  p.text_box year_calendar, at: [page_width - hmargin_cm - 6.cm,
+                                 y + page_height / 2 - hmargin_cm],
+                            width: 6.cm, height: page_height / 2 - hmargin_cm * 2,
+                            inline_format: true,
+                            align: :right, valign: :center,
+                            overflow: :shrink_to_fit
+end
 p.render_file('calendarA4.pdf')
 puts "Done in #{Time.now - STARTED_AT}s"
