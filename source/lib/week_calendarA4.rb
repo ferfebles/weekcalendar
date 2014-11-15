@@ -4,12 +4,12 @@ require_relative 'working_week_formatter'
 require 'prawn'
 require 'prawn/measurement_extensions'
 
-class PdfCalendar
+class CalendarDocument < Prawn::Document
   def initialize(year)
     @year = year
-    @pdf = Prawn::Document.new(page_size: 'A4', margin: 0)
-    @pdf.font 'Inconsolata0.ttf', size: 10
-    @pdf.fill_color '777777'
+    super(page_size: 'A4', margin: 0)
+    font 'Inconsolata0.ttf', size: 10
+    fill_color '777777'
     @page_width, @page_height = PDF::Core::PageGeometry::SIZES['A4']
     @grid = 0.5
     @dot_size_cm = 0.01.cm
@@ -17,18 +17,17 @@ class PdfCalendar
     @hmargin_cm = 1.cm
     @vmargin_cm = 1.4.cm
     create_stamp_dots
-    @pdf
   end
 
   def title
-    @pdf.text_box "#{@year}\nWeeks", at: [12.5.cm, 3.cm + @page_height / 2],
-                                     width: 6.cm, height: 1.cm, align: :right
+    text_box "#{@year}\nWeeks", at: [12.5.cm, 3.cm + @page_height / 2],
+                                width: 6.cm, height: 1.cm, align: :right
   end
 
   def background_odd
     [@page_height / 2, 0].each do |y|
-      @pdf.stamp_at 'dots', [@gutter_cm + @hmargin_cm - @dot_size_cm,
-                             y + @vmargin_cm]
+      stamp_at 'dots', [@gutter_cm + @hmargin_cm - @dot_size_cm,
+                        y + @vmargin_cm]
       thu_sun(y)
     end
     mid_page_mark
@@ -36,8 +35,8 @@ class PdfCalendar
 
   def background_even
     [@page_height / 2, 0].each do |y|
-      @pdf.stamp_at 'dots', [@hmargin_cm - @dot_size_cm,
-                             y + @vmargin_cm]
+      stamp_at 'dots', [@hmargin_cm - @dot_size_cm,
+                        y + @vmargin_cm]
       mon_wed(y)
     end
     mid_page_mark
@@ -70,25 +69,25 @@ class PdfCalendar
   end
 
   def calendar_column_bottom(text, x = 0, y = 0)
-    current_color = @pdf.fill_color
+    current_color = fill_color
     calendar_lines = text.split("\n").size - 2
-    @pdf.fill_color = 'FFFFFF' # "1177AA"
-    @pdf.fill_rectangle([x + @page_width - @hmargin_cm - (@grid * 9.5).cm,
-                         y + @vmargin_cm + (@grid * (calendar_lines + 0.5)).cm],
-                        (@grid * 9).cm, (@grid * calendar_lines).cm)
-    @pdf.fill_color = current_color
-    @pdf.text_box text, at: [x + @page_width - @hmargin_cm - 6.05.cm,
-                             y + @page_height / 2 - @vmargin_cm],
-                        width: 5.85.cm, height: 12.cm,
-                        inline_format: true,
-                        align: :right, valign: :bottom,
-                        leading: 1.15.mm,
-                        overflow: :shrink_to_fit, min_font_size: 2
+    self.fill_color = 'FFFFFF' # "1177AA"
+    fill_rectangle([x + @page_width - @hmargin_cm - (@grid * 9.5).cm,
+                    y + @vmargin_cm + (@grid * (calendar_lines + 0.5)).cm],
+                   (@grid * 9).cm, (@grid * calendar_lines).cm)
+    self.fill_color = current_color
+    text_box text, at: [x + @page_width - @hmargin_cm - 6.05.cm,
+                        y + @page_height / 2 - @vmargin_cm],
+                   width: 5.85.cm, height: 12.cm,
+                   inline_format: true,
+                   align: :right, valign: :bottom,
+                   leading: 1.15.mm,
+                   overflow: :shrink_to_fit, min_font_size: 2
   end
 
   def create_stamp_dots(name = 'dots', width = 6 * 3, height = 6 * 2)
-    @pdf.create_stamp name do
-      @pdf.fill_color = '555555'
+    create_stamp name do
+      self.fill_color = '555555'
       (0 .. height).step(@grid) do |y|
         (0 .. width).step(@grid) do |x|
           radius_cm = case
@@ -99,31 +98,27 @@ class PdfCalendar
                       else
                         @dot_size_cm / 3
                       end
-          @pdf.fill_circle [x.cm + @dot_size_cm, y.cm + @dot_size_cm], radius_cm
+          fill_circle [x.cm + @dot_size_cm, y.cm + @dot_size_cm], radius_cm
         end
       end
     end
   end
 
   def day_box(text, x = 0, y = 0)
-    @pdf.text_box text, at: [x, y], width: (@grid * 2).cm,
-                        height: (@grid + 0.05).cm,
-                        align: :center, valign: :center
+    text_box text, at: [x, y], width: (@grid * 2).cm,
+                   height: (@grid + 0.05).cm,
+                   align: :center, valign: :center
   end
 
   def mid_page_mark
-    @pdf.stroke do
-      @pdf.stroke_color 'DDDDDD'
+    stroke do
+      stroke_color 'DDDDDD'
       line_width 0.1
-      @pdf.horizontal_line 0, @hmargin_cm * 2,
-                           at: @page_height / 2
-      @pdf.horizontal_line @page_width - @hmargin_cm * 2, @page_width,
-                           at: @page_height / 2
+      horizontal_line 0, @hmargin_cm * 2,
+                      at: @page_height / 2
+      horizontal_line @page_width - @hmargin_cm * 2, @page_width,
+                      at: @page_height / 2
     end
-  end
-
-  def method_missing(m, *args, &block)
-    @pdf.send(m, *args, &block)
   end
 end
 
@@ -135,7 +130,7 @@ vmargin_cm = 1.4.cm
 
 year = 2015 # Time.now.year
 year_calendar = []
-p = PdfCalendar.new(year)
+p = CalendarDocument.new(year)
 
 # First page
 p.title
