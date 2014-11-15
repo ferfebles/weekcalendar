@@ -1,50 +1,8 @@
 STARTED_AT = Time.now
 require_relative 'working_week'
+require_relative 'working_week_formatter'
 require 'prawn'
 require 'prawn/measurement_extensions'
-
-# Returns a pdf formatted string with the
-# month calendar, for the provided working_week
-class WeekCalendar
-  def initialize(wweek)
-    @wweek = wweek
-  end
-
-  def format_for_month_calendar
-    Date::MONTHNAMES[@wweek.month] +
-    @wweek.month_calendar.map do |day|
-      current_week?(day) ? d_style(tag(day)) : tag(day)
-    end.join
-  end
-
-  def format_for_year_calendar
-    week = @wweek.days.map { |d| format('%2d', d.mday) }.join('  ')
-    sunday = @wweek.days.last
-    case
-    when (1..7).include?(sunday.mday) && sunday.year == @wweek.year
-      d_style("#{week}  #{Date::MONTHNAMES[@wweek.days.last.month][0]}\n")
-    when (8..14).include?(sunday.mday)
-      "#{week}  #{Date::MONTHNAMES[@wweek.days.last.month][1]}\n"
-    when (15..21).include?(sunday.mday)
-      "#{week}  #{Date::MONTHNAMES[@wweek.days.last.month][2]}\n"
-    else
-      "#{week}   \n"
-    end
-  end
-
-  def current_week?(day)
-    @wweek.days.include? day
-  end
-
-  def d_style(text)
-    "<color rgb='000000'>" + text + '</color>'
-  end
-
-  def tag(day)
-    (day.monday? ? "\n" : '  ') +
-    format('%2d', day.mday)
-  end
-end
 
 class PdfCalendar
   def initialize(year)
@@ -54,7 +12,7 @@ class PdfCalendar
     @pdf.fill_color '777777'
     @page_width, @page_height = PDF::Core::PageGeometry::SIZES['A4']
     @grid = 0.5
-    @dot_size_cm = 0.015.cm
+    @dot_size_cm = 0.01.cm
     @gutter_cm = 1.cm
     @hmargin_cm = 1.cm
     @vmargin_cm = 1.4.cm
@@ -88,7 +46,8 @@ class PdfCalendar
   def mon_wed(y = 0)
     xd = 0
     ['mon', 'tue', 'wed'].each do |day|
-      day_box day, @hmargin_cm + (5 + xd).cm, y + @page_height / 2 - @vmargin_cm
+      day_box day, @hmargin_cm + (5 + xd).cm,
+              y + @page_height / 2 - @vmargin_cm
       xd += 6
     end
   end
@@ -118,7 +77,7 @@ class PdfCalendar
                          y + @vmargin_cm + (@grid * (calendar_lines + 0.5)).cm],
                         (@grid * 9).cm, (@grid * calendar_lines).cm)
     @pdf.fill_color = current_color
-    @pdf.text_box text, at: [x + @page_width - @hmargin_cm - 6.cm,
+    @pdf.text_box text, at: [x + @page_width - @hmargin_cm - 6.05.cm,
                              y + @page_height / 2 - @vmargin_cm],
                         width: 5.85.cm, height: 12.cm,
                         inline_format: true,
@@ -127,11 +86,11 @@ class PdfCalendar
                         overflow: :shrink_to_fit, min_font_size: 2
   end
 
-  def create_stamp_dots
-    @pdf.create_stamp 'dots' do
+  def create_stamp_dots(name = 'dots', width = 6 * 3, height = 6 * 2)
+    @pdf.create_stamp name do
       @pdf.fill_color = '555555'
-      (0 .. 6 * 2).step(@grid) do |y|
-        (0 .. 6 * 3).step(@grid) do |x|
+      (0 .. height).step(@grid) do |y|
+        (0 .. width).step(@grid) do |x|
           radius_cm = case
                       when x % 6 == 0
                         @dot_size_cm
@@ -147,13 +106,19 @@ class PdfCalendar
   end
 
   def day_box(text, x = 0, y = 0)
-    @pdf.text_box text, at: [x, y], width: 1.cm, height: 0.45.cm,
+    @pdf.text_box text, at: [x, y], width: (@grid * 2).cm,
+                        height: (@grid + 0.05).cm,
                         align: :center, valign: :center
   end
 
   def mid_page_mark
     @pdf.stroke do
-      @pdf.horizontal_line 0, @page_width, at: @page_height / 2
+      @pdf.stroke_color 'DDDDDD'
+      line_width 0.1
+      @pdf.horizontal_line 0, @hmargin_cm * 2,
+                           at: @page_height / 2
+      @pdf.horizontal_line @page_width - @hmargin_cm * 2, @page_width,
+                           at: @page_height / 2
     end
   end
 
@@ -168,9 +133,9 @@ gutter_cm = 1.cm
 hmargin_cm = 1.cm
 vmargin_cm = 1.4.cm
 
-year = Time.now.year
-year_calendar = ''
-p = PdfCalendar.new(Time.now.year)
+year = 2015 # Time.now.year
+year_calendar = []
+p = PdfCalendar.new(year)
 
 # First page
 p.title
@@ -178,9 +143,9 @@ p.mid_page_mark
 p.stamp_at 'dots', [gutter_cm + hmargin_cm - dot_size_cm, vmargin_cm]
 p.thu_sun
 wweek = WorkingWeek.new(year, 0)
-wcalendar = WeekCalendar.new(wweek)
-p.calendar_column_bottom(wcalendar.format_for_month_calendar)
-year_calendar << wcalendar.format_for_year_calendar
+ww_formatter = WorkingWeekFormatter.new(wweek)
+p.calendar_column_bottom(ww_formatter.to_month_calendar)
+year_calendar << ww_formatter.to_year_calendar
 
 i = 1
 while true
@@ -192,27 +157,31 @@ while true
   p.start_new_page
   p.background_odd
 
-  wcalendar = WeekCalendar.new(wweek)
-  p.calendar_column_top wcalendar.format_for_month_calendar
-  year_calendar << wcalendar.format_for_year_calendar
+  ww_formatter = WorkingWeekFormatter.new(wweek)
+  p.calendar_column_top ww_formatter.to_month_calendar
+  year_calendar << ww_formatter.to_year_calendar
   i += 1
   wweek = WorkingWeek.new(year, i) rescue break
-  wcalendar = WeekCalendar.new(wweek)
-  p.calendar_column_bottom wcalendar.format_for_month_calendar
-  year_calendar << wcalendar.format_for_year_calendar
+  ww_formatter = WorkingWeekFormatter.new(wweek)
+  p.calendar_column_bottom ww_formatter.to_month_calendar
+  year_calendar << ww_formatter.to_year_calendar
   i += 1
 end
 
-p.start_new_page
+year_calendar = year_calendar.join("\n")
 p.font 'Inconsolata0.ttf', size: 6
-p.mid_page_mark
-[page_height / 2 , 0].each do |y|
-  p.text_box year_calendar, at: [page_width - hmargin_cm - 6.cm,
-                                 y + page_height / 2 - hmargin_cm],
-                            width: 6.cm, height: page_height / 2 - hmargin_cm * 2,
-                            inline_format: true,
-                            align: :right, valign: :center,
-                            overflow: :shrink_to_fit
+p.create_stamp_dots('dots_year', 14.5, 12)
+[0, gutter_cm].each do |x|
+  p.start_new_page
+  p.mid_page_mark
+  [page_height / 2 , 0].each do |y|
+    p.stamp_at('dots_year', [x + hmargin_cm, y + vmargin_cm])
+    p.text_box year_calendar, at: [x + page_width - hmargin_cm - 7.cm,
+                                   y + page_height / 2 - hmargin_cm],
+                              width: 6.cm, height: page_height / 2 - hmargin_cm * 2,
+                              inline_format: true,
+                              align: :right, valign: :center
+  end
 end
 p.render_file('calendarA4.pdf')
 puts "Done in #{Time.now - STARTED_AT}s"
