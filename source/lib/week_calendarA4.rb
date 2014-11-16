@@ -1,4 +1,5 @@
 STARTED_AT = Time.now
+
 require_relative 'working_week'
 require_relative 'working_week_formatter'
 require 'prawn'
@@ -18,6 +19,9 @@ class CalendarDocument < Prawn::Document
     @vmargin_cm = 1.4.cm
     create_stamp_dots
   end
+
+  attr_accessor :page_width, :page_height, :gutter_cm,
+                :hmargin_cm, :vmargin_cm, :dot_size_cm
 
   def title
     text_box "#{@year}\nWeeks", at: [12.5.cm, 3.cm + @page_height / 2],
@@ -71,7 +75,7 @@ class CalendarDocument < Prawn::Document
   def calendar_column_bottom(text, x = 0, y = 0)
     current_color = fill_color
     calendar_lines = text.split("\n").size - 2
-    self.fill_color = 'FFFFFF' # "1177AA"
+    self.fill_color = 'FFFFFF'
     fill_rectangle([x + @page_width - @hmargin_cm - (@grid * 9.5).cm,
                     y + @vmargin_cm + (@grid * (calendar_lines + 0.5)).cm],
                    (@grid * 9).cm, (@grid * calendar_lines).cm)
@@ -112,7 +116,7 @@ class CalendarDocument < Prawn::Document
 
   def mid_page_mark
     stroke do
-      stroke_color 'DDDDDD'
+      stroke_color 'AAAAAA'
       line_width 0.1
       horizontal_line 0, @hmargin_cm * 2,
                       at: @page_height / 2
@@ -122,20 +126,14 @@ class CalendarDocument < Prawn::Document
   end
 end
 
-page_width, page_height = PDF::Core::PageGeometry::SIZES['A4']
-dot_size_cm = 0.015.cm
-gutter_cm = 1.cm
-hmargin_cm = 1.cm
-vmargin_cm = 1.4.cm
-
-year = 2015 # Time.now.year
+year = (ARGV[0] || Time.now.year).to_i
 year_calendar = []
 p = CalendarDocument.new(year)
 
 # First page
 p.title
 p.mid_page_mark
-p.stamp_at 'dots', [gutter_cm + hmargin_cm - dot_size_cm, vmargin_cm]
+p.stamp_at 'dots', [p.gutter_cm + p.hmargin_cm - p.dot_size_cm, p.vmargin_cm]
 p.thu_sun
 wweek = WorkingWeek.new(year, 0)
 ww_formatter = WorkingWeekFormatter.new(wweek)
@@ -166,17 +164,18 @@ end
 year_calendar = year_calendar.join("\n")
 p.font 'Inconsolata0.ttf', size: 6
 p.create_stamp_dots('dots_year', 14.5, 12)
-[0, gutter_cm].each do |x|
+[0, p.gutter_cm].each do |x|
   p.start_new_page
   p.mid_page_mark
-  [page_height / 2 , 0].each do |y|
-    p.stamp_at('dots_year', [x + hmargin_cm, y + vmargin_cm])
-    p.text_box year_calendar, at: [x + page_width - hmargin_cm - 7.cm,
-                                   y + page_height / 2 - hmargin_cm],
-                              width: 6.cm, height: page_height / 2 - hmargin_cm * 2,
+  [p.page_height / 2 , 0].each do |y|
+    p.stamp_at('dots_year', [x + p.hmargin_cm, y + p.vmargin_cm])
+    p.text_box year_calendar, at: [x + p.page_width - p.hmargin_cm - 7.cm,
+                                   y + p.page_height / 2 - p.hmargin_cm],
+                              width: 6.cm, height: p.page_height / 2 - p.hmargin_cm * 2,
                               inline_format: true,
                               align: :right, valign: :center
   end
 end
-p.render_file('calendarA4.pdf')
+p.render_file("calendars/calendarA4_#{year}.pdf")
+`open "calendars/calendarA4_#{year}.pdf"`
 puts "Done in #{Time.now - STARTED_AT}s"
