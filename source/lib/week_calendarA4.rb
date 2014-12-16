@@ -115,6 +115,7 @@ class CalendarDocument < Prawn::Document
   end
 
   def mid_page_mark
+    return
     stroke do
       stroke_color 'AAAAAA'
       line_width 0.1
@@ -160,20 +161,26 @@ while true
   year_calendar << ww_formatter.to_year_calendar
   i += 1
 end
+p.start_new_page
+p.stamp_at 'dots', [p.hmargin_cm - p.dot_size_cm,
+                    p.page_height / 2 + p.vmargin_cm]
+p.mon_wed(p.page_height / 2)
 
 year_calendar = year_calendar.join("\n")
 p.font 'Inconsolata0.ttf', size: 6
 p.create_stamp_dots('dots_year', 14.5, 12)
-[0, p.gutter_cm].each do |x|
-  p.start_new_page
-  p.mid_page_mark
-  [p.page_height / 2 , 0].each do |y|
-    p.stamp_at('dots_year', [x + p.hmargin_cm, y + p.vmargin_cm])
-    p.text_box year_calendar, at: [x + p.page_width - p.hmargin_cm - 7.cm,
-                                   y + p.page_height / 2 - p.hmargin_cm],
-                              width: 6.cm, height: p.page_height / 2 - p.hmargin_cm * 2,
-                              inline_format: true,
-                              align: :right, valign: :center
+3.times do
+  [0, p.gutter_cm].each do |x|
+    p.start_new_page
+    p.mid_page_mark
+    [p.page_height / 2 , 0].each do |y|
+      p.stamp_at('dots_year', [x + p.hmargin_cm, y + p.vmargin_cm])
+      p.text_box year_calendar, at: [x + p.page_width - p.hmargin_cm - 7.cm,
+                                     y + p.page_height / 2 - p.hmargin_cm],
+                                width: 6.cm, height: p.page_height / 2 - p.hmargin_cm * 2,
+                                inline_format: true,
+                                align: :right, valign: :center
+    end
   end
 end
 p.render_file("calendars/calendarA4_#{year}.pdf")
