@@ -39,7 +39,7 @@ class CalendarDocument < Prawn::Document
   end
 
   def mon_wed
-    [['mon', 5], ['tue', 11], ['wed', 17]].each do |day|
+    [['mon', 5], ['tue', 11], ['wed', 17]].each do |day, x|
       day_box day, @hmargin_cm + x.cm, @page_height - @vmargin_cm
     end
   end
@@ -77,17 +77,20 @@ class CalendarDocument < Prawn::Document
       self.fill_color = '555555'
       (0..height).step(@grid) do |y|
         (0..width).step(@grid) do |x|
-          radius_cm = case
-                      when x % 6 == 0
-                        @dot_size_cm
-                      when x % 1 == 0
-                        @dot_size_cm / 2
-                      else
-                        @dot_size_cm / 3
-                      end
-          fill_circle [x.cm + @dot_size_cm, y.cm + @dot_size_cm], radius_cm
+          fill_circle [x.cm + @dot_size_cm, y.cm + @dot_size_cm], radius_cm(x)
         end
       end
+    end
+  end
+
+  def radius_cm(x)
+    case
+    when x % 6 == 0
+      @dot_size_cm
+    when x % 1 == 0
+      @dot_size_cm / 2
+    else
+      @dot_size_cm / 3
     end
   end
 
@@ -122,24 +125,22 @@ loop do
   i += 1
 end
 
-# Blank even page
-p.start_new_page
-
 # Year view pages
 year_calendar = year_calendar.join("\n")
 p.font 'Inconsolata0.ttf', size: 6
 p.create_stamp_dots('dots_year', 14.5, 12)
 3.times do
-  [0, p.gutter_cm].each do |x|
+  [p.gutter_cm, 0].each do |x|
     p.start_new_page
-    [p.page_height, 0].each do |y|
-      p.stamp_at('dots_year', [x + p.hmargin_cm, y + p.vmargin_cm])
-      p.text_box year_calendar, at: [x + p.page_width - p.hmargin_cm - 7.cm,
-                                     y + p.page_height - p.hmargin_cm],
-                                width: 6.cm, height: p.page_height - p.hmargin_cm * 2,
-                                inline_format: true,
-                                align: :right, valign: :center
-    end
+    p.stamp_at('dots_year', [x + p.hmargin_cm, p.vmargin_cm])
+    p.text_box year_calendar,
+               at: [x + p.page_width - p.hmargin_cm - 7.cm,
+                    p.page_height - p.hmargin_cm],
+               width: 6.cm,
+               height: p.page_height - p.hmargin_cm * 2,
+               inline_format: true,
+               align: :right, valign: :center
+
   end
 end
 p.render_file("calendars/calendarA5_#{year}.pdf")
