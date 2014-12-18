@@ -1,4 +1,3 @@
-
 STARTED_AT = Time.now
 
 require_relative 'working_week'
@@ -6,6 +5,7 @@ require_relative 'working_week_formatter'
 require 'prawn'
 require 'prawn/measurement_extensions'
 
+# Used to simplify document creation
 class CalendarDocument < Prawn::Document
   def initialize(year)
     @year = year
@@ -15,8 +15,7 @@ class CalendarDocument < Prawn::Document
     @page_height, @page_width = PDF::Core::PageGeometry::SIZES['A5']
     @grid = 0.5
     @dot_size_cm = 0.01.cm
-    @gutter_cm = 1.cm
-    @hmargin_cm = 1.cm
+    @gutter_cm = @hmargin_cm = 1.cm
     @vmargin_cm = 1.4.cm
     create_stamp_dots
   end
@@ -40,23 +39,19 @@ class CalendarDocument < Prawn::Document
   end
 
   def mon_wed
-    xd = 0
-    ['mon', 'tue', 'wed'].each do |day|
-      day_box day, @hmargin_cm + (5 + xd).cm, @page_height - @vmargin_cm
-      xd += 6
+    [['mon', 5], ['tue', 11], ['wed', 17]].each do |day|
+      day_box day, @hmargin_cm + x.cm, @page_height - @vmargin_cm
     end
   end
 
   def thu_sun
-    xd = - 6
-    ['thu', 'fri', 'sat'].each do |day|
-      xd += 6
+    [['thu', 5], ['fri', 11], ['sat', 17]].each do |day, x|
       day_box day,
-              @gutter_cm + @hmargin_cm + (5 + xd).cm,
+              @gutter_cm + @hmargin_cm + x.cm,
               @page_height - @vmargin_cm
     end
     day_box 'sun',
-            @gutter_cm + @hmargin_cm + (5 + xd).cm,
+            @gutter_cm + @hmargin_cm + 17.cm,
             @page_height - @vmargin_cm - 4.5.cm
   end
 
@@ -96,7 +91,6 @@ class CalendarDocument < Prawn::Document
     end
   end
 
-  
   def day_box(text, x = 0, y = 0)
     text_box text, at: [x, y], width: (@grid * 2).cm,
                    height: (@grid + 0.05).cm,
