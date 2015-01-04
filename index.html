@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html>
 
@@ -120,3 +121,129 @@ On the other, you can see how this week is going: done tasks from previous days 
 
   </body>
 </html>
+=======
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Weekcalendar : Simple &amp; light week view calendar">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Weekcalendar</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/ferfebles/weekcalendar">View on GitHub</a>
+
+          <h1 id="project_title">Weekcalendar</h1>
+          <h2 id="project_tagline">Simple &amp; light week view calendar</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/ferfebles/weekcalendar/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/ferfebles/weekcalendar/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><img src="/weekcalendar/images/WeekView.png" alt="WeekCalendar"></p>
+
+<h1>
+<a id="why" class="anchor" href="#why" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why</h1>
+
+<p>I'm a systems engineer that writes a lot of code: we have more than 50.000 computers, 1.100 servers and 900 remote offices.
+Basically, I manage systems by writing code.</p>
+
+<p>And I'm not very good with my to-do lists: half the time learning, testing and sharing (procrastinating?), the other half absolutely immersed in solving just one problem (sometimes not the most important one).</p>
+
+<p>So, a few years ago I started to read some articles and books about productivity, delivering on time, lean... and began to practice one of the simplest methods: the pomodoro technique.</p>
+
+<p>It's easy to apply in any environment, and it just works. If you haven't heard about it, take a look at <a href="http://www.pomodorotechnique.com">http://www.pomodorotechnique.com</a></p>
+
+<p>But the pomodoro technique works mainly in the "To Do Today" mode, and I've always liked to work with the whole week picture.
+On one hand, it gives me context: the work of today is usually related with the previous days.
+On the other, you can see how this week is going: done tasks from previous days give you peace of mind, and unfinished ones propel you to work harder or to redefine your project schedule.</p>
+
+<p>So, I started to look for something that I could use as a week calendar, and where I could use some 'pomodorish' technique: just to write down the work that needs to be done today, and track the tasks' progress.</p>
+
+<p>You can imagine that I found nothing that I liked. So, I started to think about the week calendar that I would love to use...</p>
+
+<h1>
+<a id="how" class="anchor" href="#how" aria-hidden="true"><span class="octicon octicon-link"></span></a>How</h1>
+
+<p>The design, was driven by simplicity:</p>
+
+<ol>
+<li><p>Only one font.</p></li>
+<li><p>No graphics, only chars and dots.</p></li>
+<li><p>No colours, just black and only 'three' shades of grey.</p></li>
+<li><p>Easy to use with the pomodoro technique.</p></li>
+<li><p>All week view, but with a size as small as possible.</p></li>
+<li><p>Half cm. non invasive grid, that can be used as a ruler.</p></li>
+<li><p>All possible space to you (avoid adding unneeded elements).</p></li>
+<li><p>Days on the right, you can write one line up.</p></li>
+</ol>
+
+<p>And being a programmer with almost no free time, I wrote a little script in Ruby, using the prawn gem that allows you to write PDF documents.</p>
+
+<h1>
+<a id="the-result" class="anchor" href="#the-result" aria-hidden="true"><span class="octicon octicon-link"></span></a>The result</h1>
+
+<h1>
+<a id="how-to-print-the-pdf" class="anchor" href="#how-to-print-the-pdf" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to print the PDF</h1>
+
+<p>As I used a small font size, and different shades of grey to highlight the current week, you cannot use any laser printer. Almost all laser printers simulate greys by dithering or halftoning, and small fonts look terrible.</p>
+
+<p>It's better to use a inkjet printer, with any good quality paper. I doesn't need to be photographic paper. I used a cheap inkjet in Black &amp; White mode (medium quality without using colour cartridges) and white A4 120gr/cm paper, and the results were quite good.</p>
+
+<p>If you use an A5 paper, you have the finished product. But if you use another size as I did with my A4 paper, you would need first to arrange two A5 in an A4, and after printing you will need to cut half the A4 to get the calendar. This is not easy: my printer driver was not able to arrange the A5 into a double sided A4, and if you want all the pages with a perfect size, you will have to use a industrial guillotine. I ended by printing manually and then giving the paper to a professional to cut it.</p>
+
+<p>The next time, I probably will send the pdf directly to a professional to do the whole job.</p>
+
+<h1>
+<a id="bonus" class="anchor" href="#bonus" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bonus</h1>
+
+<p>After writing the code, and having printed the calendar, I started to look for a landscape A5 ring binder... If are still reading you can suppose that I had decided to design and build my own!.</p>
+
+<p>There are lots of tutorials around the internet. So this are only a few tricks, and some pictures that I took during the process.</p>
+
+<ol>
+<li><p>I bought three cheap two-ring binders, and used a Dremel to take the rings apart.</p></li>
+<li><p>The base structure is made of 3mm cardboard. Two rectangles for the covers, and one thin rectangle for the spine. The size has to be at least two cm higher and four wider than an A5, but it depends on your rings and personal preferences.</p></li>
+<li><p>I've used 2mm eva foam and glue to bind the cardboard. Remember to leave about 5mm between the covers and the spine.</p></li>
+<li><p>I've looked for some high quality images of textures on the web (there are zillions), and send them to be printed with an hp latex printer over display panel paper. It resists sun, water and the result was fantastic. The size of this piece should be at least 3cm bigger on each side than the eva foam.</p></li>
+<li><p>Once you glue the cover to the eva foam, you have to cut the corners, and fold the remaining part to be glued on the inside, over the cardboard.</p></li>
+<li><p>I used black acrylic paper for the inside. It's a nice textured paper, but very tough without being too thick.</p></li>
+<li><p>Finally, the rings. You need to join them to the binder with a rivet. I found a very good cobbler with a hand tool to make holes and put rivets to shoes. He did a fantastic job!!.</p></li>
+</ol>
+
+<p>At the end I made three ring binders. The first test, full white, without texture printed on the outside. The other two were the real ones: they were almost too perfect, they don't seem to be hand made at all. Beautifully printed and fitted with a full 2015 week calendar, they were send as a Christmas gift to my brother and one cousin. I hope they will like it!!.</p>
+
+<p>One ending note, all this was possible thanks to my wife. She was the one that reviewed my designs, gave me ideas about art materials that can be used for making the binder, and over all she took care of our mischievous little twins while I was doing all this.</p>
+
+<p>She makes my day, every day.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Weekcalendar maintained by <a href="https://github.com/ferfebles">ferfebles</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
+>>>>>>> FETCH_HEAD
