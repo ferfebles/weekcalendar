@@ -1,7 +1,7 @@
 Week Calendar
 ============
 
-[Simple &amp; light week view calendar](http://ferfebles.github.io/weekcalendar/)
+[Simple week view calendar](http://ferfebles.github.io/weekcalendar/)
 
 # For the impatient #
 
